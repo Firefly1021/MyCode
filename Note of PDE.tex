@@ -1,0 +1,654 @@
+\documentclass[a4paper,UTF8,12pt]{ctexart}
+\usepackage{amsmath}%数学模式支持
+\usepackage{amssymb}%数学符号支持
+\usepackage{mathrsfs}%花体字支持
+\usepackage{geometry}
+\usepackage[most]{tcolorbox}
+\usepackage{color}
+\usepackage{fancyhdr} 
+\usepackage{flowchart}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{float}                  % 图片浮动位置
+\usepackage{subfigure}     
+\everymath{\displaystyle}            
+\DeclareMathOperator*{\xRightarrow}{\Longrightarrow}
+\pagestyle{plain}
+\hypersetup{
+colorlinks=true,
+linkcolor=black
+}
+\geometry{left=2.0cm,right=2.0cm,top=2.0cm,bottom=2.0cm}
+\title{偏微分方程学习笔记}
+\author{Flammario}
+\date{\quad }
+
+\begin{document}
+0\maketitle
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+\section{Fundamental Knowledge}
+\subsection{Real Analysis}
+先介绍一些在数学分析中学过的知识,至于证明将不再给出\\
+\textbf{Taylor展开}\quad 假设$f:\mathbb{R}^n\to\mathbb{R}$是光滑函数(无穷次可微),那么有
+$$
+f(x+h) = \sum_{|\alpha|\leqslant k}\frac{1}{\alpha !}D^{\alpha}f(x)h^{\alpha}+o (|h|^{k})
+$$
+其中$k$可以为任何正整数,$\alpha$为多重指标.\\
+\textbf{Leibniz公式}\quad 设$\alpha,\beta$均为多重指标,且$\beta\leqslant \alpha$,$\binom{\alpha}{\beta} = \frac{\alpha !}{\beta !(\alpha-\beta)!}$,成立
+$$
+D^{\alpha}(uv) = \sum_{\beta\leqslant \alpha}\binom{\alpha}{\beta}D^{\beta}uD^{\alpha-\beta}v
+$$
+下面的定理在多元微积分中非常常见,称之为散度定理或者Gauss-Green公式
+\begin{tcolorbox}[colback=red!5!white,colframe=gray!75!black,title=\textbf{Gauss-Green公式},sharpish corners]
+    假设$\Omega$是$\mathbb{R}^n$中的一个有界开集,且$\partial\Omega\in C^1$.如果$F:\bar{\Omega}\to\mathbb{R}^n$属于$C^1(\Omega)\cap C(\bar{\Omega})$,则
+    $$
+    \int_\Omega\mathrm{div}F\mathrm{d}x = \int_{\partial \Omega} F\cdot n\mathrm{d}S
+    $$
+    其中$n$为$\partial\Omega$的单位外法向量
+\end{tcolorbox}
+由散度定理很容易推出下面的公式\\
+\textbf{分部积分公式}\quad 设$u,v\in C^1(\Omega )\cap C(\bar{\Omega})$,那么有
+$$
+\int_\Omega u_{x_i}v \mathrm{d}x = -\int_\Omega uv_{x_i}\mathrm{d}x + \int_{\partial \Omega} uvn_i\mathrm{d}S\quad (i=1,2,\cdots,n)
+$$
+其中$n_i$为$\partial\Omega$的单位外法向量$n$的第$i$个分量\\
+\textbf{格林公式}\quad 以下三个都可以称之为格林公式:\\
+1.如果$u\in C^2(\Omega )\cap C^1(\bar{\Omega})$,则
+$$
+\int_\Omega \bigtriangleup u\mathrm{d}x = \int_{\partial \Omega}\frac{\partial u}{\partial n}\mathrm{d}S
+$$
+2.如果$u\in C^1(\Omega )\cap C(\bar{\Omega}),v\in C^2(\Omega )\cap C^1(\bar{\Omega})$
+$$
+\int_\Omega Du\cdot Dv\mathrm{d}x = -\int_\Omega u\bigtriangleup v\mathrm{d}x+\int_{\partial \Omega}u\frac{\partial v}{\partial n}\mathrm{d}S
+$$
+3.如果$u,v\in C^2(\Omega )\cap C^1(\bar{\Omega})$,那么
+$$
+\int_\Omega u\bigtriangleup v-v\bigtriangleup u\mathrm{d}x = \int_{\partial \Omega}u\frac{\partial v}{\partial n}-v\frac{\partial u}{\partial n}\mathrm{d}S
+$$
+\textbf{Lusin定理}\quad 设$f:\mathbb{R}^n\to \mathbb{R}$为可测函数,使得$\mu (A)<\infty$,其中$A:=\{x\in \mathbb{R}^n:f(x)\neq 0\}$,则对任何$\varepsilon >0$,存在函数$f_{\varepsilon}\in C_c{\mathrm{R}^n}$,且supp\,$f_{\varepsilon}$为$A$的紧子集,满足
+$$
+\sup_{x\in\mathrm{R}^n}|f_{\varepsilon}(x)|\leqslant \sup_{x\in\mathrm{R}^n}|f(x)|,\text{并且}\mu(\{x\in \mathbb{R}^n:f(x)\neq f_{\varepsilon}(x)\})<\varepsilon
+$$
+\textbf{Beppo Levi单调收敛定理}\quad 设$A$为$\mathbb{R}^n$中的可测子集,序列$\{f_k(x)\}^\infty _{k=1}$满足$f_{k}\in L^1(A)$,并且
+$$
+0\leqslant f_1\leqslant f_2\leqslant \cdots\leqslant f_k\leqslant f_{k+1}\leqslant\cdots ,\lim_{k\to \infty}\int_{A}f_k(x)\mathrm{d}x<\infty
+$$
+则存在函数$f\in L^1(A)$,使得
+$$
+lim_{k\to \infty}f_k(x)=f(x),lim_{k\to \infty}\int_{A}|f_k(x)-f(x)|\mathrm{d}x=0
+$$
+\textbf{Fatou引理}\quad 设$A$为$\mathbb{R}^n$中的可测子集,$\{f_k(x)\}^\infty _{k=1}$为可测函数$f_k:A\to \mathbb{R}$的序列,在$A$上满足
+$$
+f_k\geqslant 0\quad a.e.
+$$
+则
+$$
+\int_A\liminf_{k\to \infty}f_k(x)\mathrm{d}x\leqslant\liminf\int_Af_k(x)\mathrm{d}x
+$$
+这个不等式的两边都允许是$\infty$.\\
+\textbf{Lebesgue控制收敛定理}\quad 设$A$为$\mathbb{R}^n$中的可测子集,$\{f_k(x)\}^\infty _{k=1}$是$A$上几乎处处收敛的可测函数列,$\lim_{k\to \infty}f_k(x)=f(x)$.若存在非负函数$g(x)\in L^1(A)$,并且对所有的$k\geqslant 1$
+$$
+|f_k(x)|\leqslant g(x)\quad \forall x\in A,
+$$
+则函数$f$及所有的$f_k$都在$A$上可积,并且
+$$
+\lim_{k\to \infty}\int_A|f_k(x)-f(x)|\mathrm{d}x=0
+$$
+特别的
+$$
+\lim_{k\to \infty}\int_Af_k(x)\mathrm{d}x=\int_Af(x)\mathrm{d}x
+$$
+\textbf{Theorem}\quad 设$A,B$为$\mathbb{R}^n$中的可测子集,$f:A\times B\subset \mathbb{R}^m\times\mathbb{R}^n\to [-\infty,\infty]$为可测函数.\par
+(a)(Tonelli定理)\quad 对每个$x\in A$,函数$f(x,\cdot):y\in B\to f(x,y)\in [-\infty,\infty]$是可测的,对每个$y\in B$,函数$f(\cdot,y):x\in A\to f(x,y)\in [-\infty,\infty]$可测函数.而且,函数$f$在$A\times B$上可积,即
+$$
+\iint _{A\times B}|f(x,y)|\mathrm{d}x\mathrm{d}y<\infty
+$$
+当且仅当下列两条件之一满足:
+$$
+\begin{aligned}
+    \int_A\Bigl(\int_B|f(x,y)|\mathrm{d}y\Bigr)\mathrm{d}x &<\infty,\\
+    \int_B\Bigl(\int_A|f(x,y)|\mathrm{d}x\Bigr)\mathrm{d}y &<\infty.\\
+\end{aligned}
+$$
+\quad \quad (b)(Fubini定理)\quad 如果$f$在$A\times B$上可积,则函数$f(\cdot,y):A\to [-\infty,\infty]$对几乎所有的$y\in B$可积,函数$f(x,\cdot):B\to [-\infty,\infty]$对几乎所有的$x\in A$可积,$f$在$A\times B$上的Lebesgue积分由
+$$
+\iint _{A\times B}f(x,y)\mathrm{d}x\mathrm{d}y=\int_A\Bigl(\int_Bf(x,y)\mathrm{d}y\Bigr)\mathrm{d}x=\int_B\Bigl(\int_A|f(x,y)|\mathrm{d}x\Bigr)\mathrm{d}y
+$$
+给出.
+
+
+\subsection{Functional Analysis}
+由于PDE对泛函分析的要求较高,特别是Evans的第二部分,所以对泛函分析中的一些重要的定理应该掌握,甚至会证,当然这里也只给出定理的内容,而不加以证明.首先给出的便是在泛函分析中十分重要的Riesz表示定理,这个定理在第三章会有应用,它能用于微分方程的解的唯一性.\\
+\textbf{Riesz表示定理}\quad 设$F$是Hilbert空间$H$上的有界线性泛函,则必存在唯一的$y\in H$,使得
+$$
+F(x) = (x,y)\quad \forall x\in H
+$$
+这个定理说的其实就是任意有界线性泛函都可以由内积给出.我们在学习对偶空间的时候就已经思考过这么一个问题:给出一个完备的赋范线性空间$X$,如何求得其对偶空间,
+也就是说$X^*$中的元素能否具体的表示出来(毕竟我们已经知道元素是什么,但不知道长什么样子),Riesz表示定理就是干这么一件事情.\\
+\begin{tcolorbox}[colback=red!5!white,colframe=gray!75!black,title=\textbf{一些基本概念的定义},sharpish corners]
+    1.\textbf{闭算子}\quad 对于算子$A$,若在$X$中$u_k\to u$,在$Y$中$Au_k\to v$,能够推出$Au = v$,则称$A$为闭算子.\\
+    2.\textbf{紧算子}\quad 设$X,Y$为Banach空间,有界线性算子$K:X\to Y$,若对任意序列$\{x_n\}\subset X,\{Kx_n\}$有收敛子列$\{Kx_{n_i}\}$,那么就称$K$是一个紧算子.\\
+    3.\textbf{值域与零空间}\quad 线性算子$A$的零空间定义为$N(A) = \{u\in X:Au=0\}$,值域定义为$R(A) = \{v\in Y:v = Au,u\in X\}$.\\
+    4.\textbf{算子的谱}\quad 设$X$是Banach空间,$A:X\to X$是有界线性算子,$I$是恒等算子,$\lambda\in\mathbb{C}$.\\
+    (i)若存在非零元$x\in X$,使得$(\lambda I-A)x=0$,则$\lambda$是$A$的特征值,或称$\lambda$在$A$的点谱中,记作$\lambda\in\sigma _{p}(A)$.\\
+    (ii)若$\lambda$不是$A$的特征值,则$\lambda I-A$是单射,这时会出现三种情况:\\
+    (1)若$R(\lambda I-A)=X$,此时$\lambda I-A$是有界可逆的,称$\lambda$在$A$的预解集中,记作$\lambda\in\rho (A)$,其逆算子$(\lambda I-A)^{-1}$称为$A$的预解式.\\
+    (2)若$R(\lambda I-A)\neq\overline{R(\lambda I-A)}=X$,则称$\lambda$在$A$的连续谱中,记作$\lambda\in \sigma _c(A)$.\\
+    (3)若$\overline{R(\lambda I-A)}\neq X$,则称$\lambda$在$A$的剩余谱中,记作$\lambda\in\sigma _r(A)$.\\
+    显然$\sigma _p(A),\sigma _c(A),\sigma _r(A)$互不相交,且$\sigma _p(A)\cup\sigma _c(A)\cup\sigma _r(A)=\mathbb{C}-\rho (A)$.我们定义算子$A$的谱为
+    $$
+    \sigma (A)=\sigma _p(A)\cup\sigma _c(A)\cup\sigma _r(A)
+    $$
+\end{tcolorbox}
+我们将会频繁的使用这些基本概念,并且使用的时候不再重复的给出定义.\\
+\textbf{Theorem(Fedholm二择一定理)}\quad 设$H$是Hilbert空间,$K:H\to H$是一个紧线性算子,$K^*$是$K$的伴随算子,那么:\\
+(i)\, $N(I-K)$是有限维的.\\
+(ii)\, $R(I-K)$是闭集.\\
+(iii)\,$R(I-K)=N(I-K^*)^{\bot }$.\\
+(iv)\, $N(I-K)=\{0\}$当且仅当$R(I-K)=H$.\\
+(v)\, dim$N(I-K)=$dim$N(I-K^*)$.\\
+当然,我们更常用的是以下等价形式:\\
+\textbf{Theorem(Fedholm二择一定理)}\quad 设$K:H\to H$是紧算子,那么以下两种情况之一成立:\\
+(1)\,对任意的$f\in H$,方程$u-Ku=f$有唯一解.\\
+(2)\,齐次方程$u-Ku=0$有非零解.\\
+下面给出紧算子的谱性质:\\
+\textbf{Theorem}\quad 设$H$是Hilbert空间,且dim$H=\infty,K:H\to H$是紧算子,那么:\\
+(i)$0\in\sigma (K)$.\\
+(ii)$\sigma (K)-\{0\}=\sigma_p(K)-\{0\}$.\\
+(iii)$\sigma (K)-\{0\}$或者有限集,或者是一趋于0的序列\\
+\textbf{单位分解}\quad 这是整个数学中都很重要的概念.它的作用是把一个整体的问题化为许多局部问题,同时在将局部成立的定理推广到整体情形时可能会使用到该技巧.设$K\subset\mathbb{R}^n,\mathcal{O} =\{U_{\alpha}\},\alpha\in I$,其中$I$是指标集,而且$K\subset \bigcup _{\alpha\in I}U_{\alpha}$.可证明如下定理成立:\\
+\begin{tcolorbox}[colback=red!5!white,colframe=gray!75!black,title=\textbf{单位分解定理},sharpish corners]
+    对于$K$的任意开覆盖$\mathcal{O} $,必存在$C^{\infty}_{0}(\mathbb{R}^n)$函数族$\{\varphi _{\alpha}\}$满足:\\
+(1)$0\leqslant\varphi_{\alpha}(x)\leqslant 1$,且对任意的$\alpha\in I$,supp\,$\varphi_{\alpha}(x)\subset U_{\alpha}$.\\
+(2)$\forall x\in K$,存在包含$x$的开集$M$使得只有有限个$\varphi_{\alpha}(x)$在$M$上不为$0$.这也就是说是由有限多个supp\,$\varphi_{\alpha}(x)$与$M$的交集不是空集.这个性质说成是$\{\text{supp}\,\varphi_{\alpha}(x)\}$是局部有限的.\\
+(3)$\sum_{\alpha}\varphi_{\alpha}(x)=1$.因为每一点$x$只落在有限个supp\,$\varphi_{\alpha}(x)$中,所以这个和式在每一点$x$上实际是有限求和,从而不会出现收敛性的问题.\\
+\end{tcolorbox}
+一种特殊情况是当$K$是紧集时,那么开覆盖$\mathcal{O}=\{U_k\}^n_{k=1}$是有限覆盖.
+\subsection{Inequality}
+不等式对于PDE的研究是不可缺少的,因为我们需要通过各种估计来讨论解的性质.\\
+\textbf{Cauchy-Schwarz不等式}\quad 设$H$是一个内积空间,其上内积为$(\cdot,\cdot)$,由内积诱导的范数为$\|\cdot\|$,那么
+$$
+|(u,v)|\leqslant\|u\|\|v\|\quad (u,v\in H)
+$$
+\textbf{Young不等式}\quad 设$1<p,q<\infty,\frac{1}{p}+\frac{1}{q}=1$.那么
+$$
+ab\leqslant \frac{a^p}{p}+\frac{b^q}{q}\quad (a,b>0)
+$$
+\textbf{H$\ddot{o}$lder不等式}\quad 设$1\leqslant p,q\leqslant\infty,\frac{1}{p}+\frac{1}{q}=1$.如果$u\in L^p(\Omega),v\in L^q(\Omega)$,则
+$$
+\int_{\Omega|uv|}\mathrm{d}x\leqslant \|u\|_{L^p(\Omega)}\|v\|_{L^q(\Omega)}
+$$
+\textbf{Minkowski不等式}\quad 设$1\leqslant p,q\leqslant\infty$且$u,v\in L^p(\Omega)$,那么
+$$
+\|u+v\|_{L^p(\Omega)}\leqslant \|u\|_{L^p(\Omega)}+\|v\|_{L^p(\Omega)}
+$$
+\textbf{$L^p(\Omega)$范数的内插不等式}\quad 设$1\leqslant s\leqslant r\leqslant t\leqslant \infty$,并且$\frac{1}{r}=\frac{\theta}{s}+\frac{(1-\theta)}{t}$.若$u\in L^s(\Omega)\cap L^t(\Omega)$,那么$u\in L^r(\Omega)$且
+$$
+\|u\|_{L^r(\Omega)}\leqslant\|u\|^{\theta}_{L^s(\Omega)}\|u\|^{1-\theta}_{L^t(\Omega)}
+$$
+\section{Sobolev Space}
+\subsection{Weak derivatives}
+我们注意到对于任意的试验函数$\phi \in C^\infty _c(\Omega)$,对于给定的$u\in C^1(\Omega)$,我们利用分部积分公式有
+\begin{equation}
+    \int_{\Omega}u\phi_{x_i}\mathrm{d}x=-\int_{\Omega}u_{x_i}\phi\mathrm{d}x \tag{a}
+\end{equation}
+然而,对于$u\in L^p_{loc}(\Omega)$,(a)中的$u_{x_i}$未必存在,但是如果能找到一个$v\in L^p_{loc}(\Omega)$,使得我们用$v$来代替$u_{x_i}$时能够使(a)成立,那么这时候$v$自然就具有了$u_{x_i}$的某些性质,它可以看作$u$在弱意义下的导数.更一般地,我们给出\\
+\textbf{Definitions}\quad 假设$u,v\in L^1_{loc}(\Omega)$,并且$\alpha$是多重指标,如果对于任意的$\phi\in C^\infty _c(\Omega)$,都成立
+$$
+\int_{\Omega}uD^{\alpha}\phi\mathrm{d}x=(-1)^{|\alpha|}\int_{\Omega}v\phi\mathrm{d}x
+$$
+那么我们称$v$是$u$的$\alpha$阶弱导数,记为$D^{\alpha}u=v$.\\
+\textbf{Lemma}\quad 若$u$的弱导数存在,那么在允许相差一个零测集的意义下是唯一的.\\
+\textbf{Proof}\quad 假设$v,\tilde{v}\in L^1_{loc}(\Omega) $对于任意的$\phi \in C^\infty _c(\Omega)$满足
+$$
+\int_{\Omega}uD^{\alpha}\phi\mathrm{d}x=(-1)^{|\alpha|}\int_{\Omega}v\phi\mathrm{d}x=(-1)^{|\alpha|}\int_{\Omega}\tilde{v}\phi\mathrm{d}x
+$$
+那么就有
+$$
+\int_{\Omega}(v-\tilde{v})\phi\mathrm{d}x=0
+$$
+在根据$\phi$的任意性,只能是$v-\tilde{v}=0,a.e.$
+
+\subsection{Sobolev space}
+\textbf{Definitions}\quad 对于$1\leqslant p\leqslant\infty$,定义Sobolev空间为:
+$$
+W^{k,p}(\Omega)=\{u\in L^p(\Omega):D^{\alpha}u\in L^p(\Omega),\forall\alpha\in \mathbb{Z}^n_{+},|\alpha|\leqslant k\}
+$$
+其中$D^{\alpha}u$表示$u$的$\alpha$阶弱导数.定义范数为
+$$\|u\|_{W^{k,p}(\Omega)}=
+\begin{cases}
+    \Bigl(\sum_{|\alpha|\leqslant k}\int_{\Omega}|D^{\alpha}u|^p\mathrm{d}x\Bigr)^{1/p}\quad (1\leqslant p<\infty)\\
+    \sum_{|\alpha|\leqslant k}\text{ess}\sup_{x\in \Omega}|D^{\alpha}u|\quad (p=\infty)\\
+\end{cases}
+$$
+特别的,我们记$H^k(\Omega)=W^{k,2}(\Omega)$,在赋予内积
+$$
+(u,v)=\int_{\Omega}\sum_{|\alpha|\leqslant k}D^{\alpha}uD^{\alpha}v\mathrm{d}x
+$$
+之后是一个Hilbert空间.我们用$W^{k,p}_0(\Omega)$表示$C^\infty_c(\Omega)$在$W^{k,p}(\Omega)$中的闭包,那么当然就有$H^k_0(\Omega)=W^{k,2}_0(\Omega)$,在研究二阶椭圆型方程时,用的最多的还是$H^1_0(\Omega)$,也即是$C^\infty_c(\Omega)$在$H^1(\Omega)$中的闭包.\\
+\textbf{Definitions}一些收敛性的定义:\\
+(a)设$\{u_n\}^\infty_{n=1},u\in W^{k,p}(\Omega)$,我们称序列$u_n$在$W^{k,p}(\Omega)$中收敛到$u$时指
+$$
+\lim_{n\to\infty}\|u_n-u\|_{W^{k,p}(\Omega)}=0
+$$
+(b)我们记
+$$
+u_n\to u\quad \text{in}\,W^{k,p}_{loc}(\Omega)
+$$
+表示
+$$
+u_n\to u\quad \text{in}\,W^{k,p}(V)
+$$
+对于任意的$V\subset \subset \Omega$.\\
+\textbf{Theorem(弱导数的性质)}\quad 设$u,v\in W^{k,p}(\Omega),|\alpha|\leqslant k$,那么\\
+(1)$D^{\alpha}\in W^{k-|\alpha|,p}(\Omega)$,并且$D^{\beta}(D^{\alpha}u)=D^{\alpha}(D^{\beta}u)=D^{\alpha+\beta}u$,其中$|\alpha|+|\beta|\leqslant k$.\\
+(2)对任意$\lambda,\mu\in\mathbb{R},\lambda u+\mu v\in  W^{k,p}(\Omega)$并且$D^{\alpha}(\lambda u+\mu v)=\lambda D^{\alpha}u+\mu D^{\alpha}v,|\alpha|\leqslant k$.\\
+(3)若$V$是$\Omega$的开子集,那么$u\in W^{k,p}(\Omega)$.\\
+(4)若$\zeta \in C^{\infty}_c(\Omega)$,那么$\zeta u\in W^{k,p}(\Omega)$,并且
+$$
+D^{\alpha}(\zeta u)=\sum_{0\leqslant \beta\leqslant \alpha}\binom{\alpha}{\beta}D^{\beta}\zeta D^{\alpha-\beta}u 
+$$
+其中$\binom{\alpha}{\beta} = \frac{\alpha !}{\beta !(\alpha-\beta)!}$\\
+\textbf{Proof}\quad 只证明(1).根据弱导数的定义,给定$\phi \in  C^{\infty}_c(\Omega)$,那么$D^{\beta}\in  C^{\infty}_c(\Omega)$,于是
+$$
+\begin{aligned}
+    \int_{\Omega}D^{\alpha}u D^{\beta}\phi\mathrm{d}x &= (-1)^{|\alpha|}\int_{\Omega}u D^{\alpha+\beta}\phi\mathrm{d}x\\
+                                                      &= (-1)^{|\alpha|}(-1)^{|\alpha+\beta|}\int_{\Omega}\phi D^{\alpha+\beta}u\mathrm{d}x\\
+                                                      &= (-1)^{|\beta|}\int_{\Omega}\phi D^{\alpha+\beta}u\mathrm{d}x\\
+\end{aligned}
+$$
+\textbf{Theorem(Sobolev空间的完备性)}\quad 对任意的$k\in\mathbb{Z}_{+},1\leqslant p\leqslant \infty$,Sobolev空间$W^{k,p}(\Omega)$是Banach空间.\par
+下面我们来考虑空间$H^1_0(\Omega)$的性质,为椭圆方程的研究做准备.之前提到过,对于$W^{k,2}(\Omega)$空间,在赋予内积
+$$
+(u,v)=\int_{\Omega}\sum_{|\alpha|\leqslant k}D^{\alpha}uD^{\alpha}v\mathrm{d}x
+$$
+之后是一个Hilbert空间,记为$H^k(\Omega)$.现在我们来讨论$H^1_0(\Omega)$空间,对于一般的$H^k_0(\Omega)$空间的情况都可以通过对$H^1_0(\Omega)$数学归纳法得到.\\
+显然$H^1_0(\Omega)$是$H^1(\Omega)$的闭子空间,因此继承了$H^1(\Omega)$的完备性,依然是个Hilbert空间.我们记$H^{-1}(\Omega)$为$H^1_0(\Omega)$的对偶空间.\\
+\textbf{Definitions}\quad 若$f\in H^{-1}(\Omega)$,我们定义
+$$
+\|f\|_{H^{-1}(\Omega)} = \sup\{f(u):u\in H^1_0(\Omega),\|u\|_{H^1_0(\Omega)}\leqslant 1 \}
+$$
+\textbf{Theorem($H^{-1}(\Omega)$空间的特征)}\\
+(a)设$f\in H^{-1}(\Omega),v\in H^1_0(\Omega)$,那么存在一列函数$f^0,f^1,\cdots,f^n\in L^2(\Omega)$,使得
+$$
+f(v) = \int_{\Omega}f^0v+\sum^n_{i=1}f^iv_{x_i}\mathrm{d}x
+$$
+(b)
+$$
+\|f\|_{H^{-1}(\Omega)}=\inf\{(\int_{\Omega}\sum^n_{i=1}|f^i|^2\mathrm{d}x)^{\frac{1}{2}}:\text{其中}f^i\text{由上式给出}\}
+$$
+(c)特别的,对任意$u\in H^1_0(\Omega)$与$v\in L^2(\Omega)\subset H^{-1}(\Omega)$我们有
+$$
+v(u)=(v,u)_{L^2(\Omega)}
+$$
+\textbf{Proof}\quad (a)对于任意的$u,v\in H^1_0(\Omega)$,我们定义内积
+$$
+(u,v)=\int_{\Omega}DuDv+uv\mathrm{d}x
+$$
+对于$f\in H^{-1}(\Omega)$我们由Riesz表示定理,存在唯一的$u\in H^1_0(\Omega)$,使得
+\begin{equation}
+    f(v)=(u,v)=\int_{\Omega}DuDv+uv\mathrm{d}x \tag{*}
+\end{equation}
+
+
+于是只需要取$f^0=u,f^i=u_{x_i}$,这就证明了(a)和(c)\\
+(b)根据(a)我们知道,存在一列函数$g^0,g^1,\cdots,g^n\in L^2(\Omega)$,使得
+$$
+f(u) = \int_{\Omega}g^0u+\sum^n_{i=1}g^iu_{x_i}\mathrm{d}x
+$$
+在(*)令$v=u$就得到
+$$
+\int_{\Omega}|Du|^2+|u|^2\mathrm{d}x\leqslant\int_{\Omega}\sum^n_{i=1}|g^i|^2\mathrm{d}x
+$$
+再根据$f^0=u,f^i=u_{x_i}$得到
+$$
+\int_{\Omega}\sum^n_{i=1}|f^i|^2\mathrm{d}x\leqslant \int_{\Omega}\sum^n_{i=1}|g^i|^2\mathrm{d}x
+$$
+再由(a)我们可以得到
+$$
+|f(v)|\leqslant\Bigl(\int_{\Omega}\sum^n_{i=1}|f^i|^2\mathrm{d}x\Bigr)^{\frac{1}{2}}
+$$
+若$\|v\|_{H^1_0(\Omega)}\leqslant 1$我们可以得到
+$$
+\|f\|_{H^{-1}(\Omega)}\leqslant\Bigl(\int_{\Omega}\sum^n_{i=1}|f^i|^2\mathrm{d}x\Bigr)^{\frac{1}{2}}
+$$
+再令$v=\frac{u}{\|u\|_{H^1_0(\Omega)}}$,我们就能得到
+$$
+\|f\|_{H^{-1}(\Omega)}\leqslant\Bigl(\int_{\Omega}\sum^n_{i=1}|f^i|^2\mathrm{d}x\Bigr)^{\frac{1}{2}}
+$$
+\subsection{Convolution and Smoothing}
+函数的磨光化是将一个性质不太好的函数用光滑函数磨光逼近的手段。\par
+$\mathbb{R}^n$中的一族标准磨光子是指由形如
+$$
+\varphi_{\varepsilon}=\frac{1}{\varepsilon ^n}\varphi \bigl(\frac{x}{\varepsilon}\bigr),x\in \mathbb{R}^n
+$$
+的函数$\varphi _{\varepsilon}:\mathbb{R}^n\to \mathbb{R}$组成的函数族$\{\varphi _{\varepsilon}\}_{\varepsilon> 0}$,其中磨光子$\varphi:\mathbb{R}^n\to \mathbb{R}$满足:\\
+(1)$\varphi\in C^{\infty}(\mathbb{R}^n)$,对所有的$x\in\mathbb{R}^n,\varphi (x)\geqslant 0$.\\
+(2)supp\,$\varphi (x)\subset \overline{B(0,1)}$.\\
+(3)$\int_{\mathbb{R}^n}\varphi (x)\mathrm{d}x=1$.\\
+因此对每个$\varepsilon>0$,都成立:\\
+(i)$\varphi_{\varepsilon}\in C^{\infty}(\mathbb{R}^n)$,对所有的$x\in\mathbb{R}^n,\varphi_{\varepsilon}\geqslant 0$.\\
+(ii)supp\,$\varphi_{\varepsilon}\subset \overline{B(0,\varepsilon)}$.\\
+(iii)$\int_{\mathbb{R}^n}\varphi_{\varepsilon}\mathrm{d}x=1$.\par
+设$\Omega$为$\mathbb{R}^n$的开子集,函数$f\in L^1_{loc}(\Omega),\{\varphi _{\varepsilon}\}_{\varepsilon> 0}$是一族标准磨光子,对于任意的$\varepsilon >0$,定义集合$\Omega _{\varepsilon}$和函数
+$f_{\varepsilon}:\Omega _{\varepsilon}\to\mathbb{R}$如下:
+$$
+\begin{aligned}
+    \Omega _{\varepsilon}: &=\{x\in \omega:\text{dist}(x,\partial \Omega)>\varepsilon\},\\
+    f_{\varepsilon}(x)   : &= \int_{\Omega}\varphi_{\varepsilon}(x-y)f(y)\mathrm{d}y,x\in\Omega_{\varepsilon}
+\end{aligned}
+$$
+称函数族$\{f_{\varepsilon}\}_{\varepsilon >0}$为$f$的正则化族(或者是$f$的磨光函数).\par
+对每个$\varepsilon >0$,集合$\Omega_{\varepsilon}$显然是开集,这是由于映射$\Omega\to\text{dist}(x,\partial \Omega)$是连续的.球$\overline{B(x,\varepsilon)}$是包含于$\Omega$的(从而上述函数$f_{\varepsilon}$的定义有意义),对每个$x\in\Omega_{\varepsilon},f_{\varepsilon}$可等价的表示为
+$$
+\begin{aligned}
+    f_{\varepsilon} &= \int_{B(x,\varepsilon)}\varphi_{\varepsilon}(x-y)f(y)\mathrm{d}y=\int_{B(0,\varepsilon)}\varphi_{\varepsilon}(x)f(x-y)\mathrm{d}y\\
+                    &= \frac{1}{\varepsilon^n}\int_{B(x,1)}\varphi_{\varepsilon}(\frac{1}{\varepsilon})f(y)\mathrm{d}y
+\end{aligned}
+$$
+注意,除了$\Omega=\mathbb{R}^n,$此时对所有的$\varepsilon >0,\Omega_{\varepsilon}=\Omega$,这个特殊情况以外,$f_{\varepsilon}:\Omega_{\varepsilon}\to\mathbb{R}$只定义于$\Omega$的真子集$\Omega_{\varepsilon}$上.\par
+上面的描述仅仅给出了一些抽象的定义,我们最常用(常见)的还是下面的磨光子
+$$
+\varphi (x)=
+\begin{cases}
+    C\exp\bigl(\frac{1}{|x|^2-1}\bigr) &,|x|<1\\
+    0                        &,|x|\geqslant 1
+\end{cases}
+$$
+这里的常数$C$使得$\int_{\mathbb{R}^n}\varphi (x)\mathrm{d}x=1$.\par
+下面的定理建立了磨光函数的几个重要性质.例如函数$f_{\varepsilon}$是无限阶可微的(正则性质),也即是$\forall \varepsilon >0,f_{\varepsilon}\in C^{\infty}(\Omega_{\varepsilon})$.如果$f\in C(\Omega)$,则当$\varepsilon \to 0$时,在$\Omega$的紧子集上,函数$f_{\varepsilon}$一致收敛于$f$(逼近性质).\\
+\textbf{Theorem}\quad (a)设$\Omega$为$\mathbb{R}^n$中的开子集,函数$f\in L^1_{loc}(\Omega),\{f_{\varepsilon}\}_{\varepsilon >0}$为$f$的磨光函数,则对任何$\varepsilon >0$,
+$$
+f_{\varepsilon}\in C^{\infty}(\Omega_{\varepsilon})
+$$
+而且对任何多重指标$\alpha,|\alpha|\geqslant 1$,和任意的$x\in \Omega_{\varepsilon}$,
+$$
+\begin{aligned}
+    D^{\alpha}f_{\varepsilon}(x) &= \int_{\Omega}D^{\alpha}f_{\varepsilon}(x-y)f(y)\mathrm{d}y\\
+                                 &= \int_{B(x,\varepsilon)}D^{\alpha}f_{\varepsilon}(x-y)f(y)\mathrm{d}y
+\end{aligned}
+$$
+\quad \quad (b)再设对某个正整数$m\geqslant 1,f\in C^m(\Omega)$.则对$\Omega$中任意给定的紧子集$K$,存在$\varepsilon_1=\varepsilon_1(K)>0$,使得$0<\varepsilon\leqslant\varepsilon_1$时$K\subset\Omega_{\varepsilon}$,对所有的$x\in K$和$0<\varepsilon\leqslant\varepsilon_1,f_{\varepsilon}(x)$是唯一确定的,且对所有的$|\alpha|\leqslant m$,当$\varepsilon\to 0$时
+$$
+\sup_{x\in K}| D^{\alpha}f_{\varepsilon}(x)- D^{\alpha}f(x)|\to 0
+$$
+\section{Second-Order Elliptic PDE}
+\subsection{Definitions}
+在介绍了一些Sobolev空间的性质之后,现在我们考虑对具体方程的研究,首先要研究的便是二阶椭圆型偏微分方程.从本节开始,我们将会讨论二阶椭圆PDE以及它的弱解的性质.\par
+考虑边值问题
+$$(\text{I})
+\begin{cases}
+    Lu= f\quad in \, \Omega\\
+     u= 0\quad on \, \partial\Omega\\ 
+\end{cases}
+$$
+其中$\Omega\subset \mathbb{R}^n$为有界开集,$u:\bar{\Omega}\to\mathbb{R}$是未知函数,$f$是已知函数,算子$L$是有如下形式的二阶偏微分算子:
+\begin{equation}
+    Lu = -\sum^n_{i,j=1}D_j(a^{ij}(x)D_iu)+\sum^n_{i=1}b^i(x)D_iu+c(x)u
+\end{equation}
+或者可以写为
+\begin{equation}
+    Lu = -\sum^n_{i,j=1}a^{ij}(x)D_{ij}u+\sum^n_{i=1}b^i(x)D_iu+c(x)u
+\end{equation}
+其中$D_{ij}u = D_j(D_iu)$.\par
+具有形式(1)的算子我们称为\textbf{散度型算子},而形式(2)的算子称为\textbf{非散度型算子}.边界条件$u= 0\quad on \, \partial\Omega$也称为Dirichlet条件.\par
+在今后的讨论中,我们总是假设对称条件成立,即
+$$
+a^{ij}(x) = a^{ji}(x)
+$$
+\textbf{Definitions}\quad 如果对于算子$L$存在一个常数$\theta >0$使得对任意的$\xi \in\mathbb{R}^n$在$x\in\Omega$时处处成立
+$$
+\sum^n_{i,j=1}a^{ij}\xi_i\xi_j\geqslant\theta |\xi|^2
+$$
+那么我们称偏微分算子$L$是(一致)椭圆型的.事实上上面的不等式可以用二次型来考虑.\par
+接下来我们只考虑散度形式的算子(1)，并且假设算子$L$有有界系数,即$a^{ij},b^i,c\in L^{\infty}(\Omega)$,并且假设$f\in L^2(\Omega)$.\\
+\textbf{Definitions}\quad 我们定义双线性型$B[\cdot,\cdot]:H^1_0(\Omega)\times H^1_0(\Omega)\to \mathbb{R}$如下
+$$
+B[u,v] = \int_\Omega \sum^n_{i,j=1}a^{ij}D_iu D_jv+\sum^n_{i=1}b^ivD_iu+cuv\mathrm{d}x
+$$
+如果$u\in H^1_0(\Omega)$对任意的$v\in H^1_0(\Omega)$都满足
+\begin{equation}
+    B[u,v] = (f,v)
+\end{equation}
+其中$(\cdot,\cdot)$是$L^2(\Omega)$上的内积,那么我们称$u$是边值问题$(\text{I})$的一个弱解.\par
+更一般的,我们考虑边值问题
+$$
+(\text{II})
+\begin{cases}
+    Lu = f^0-\sum^n_{i=1}D_if^i\quad in \,\Omega\\
+    u=0\quad on\, \partial\Omega\\
+\end{cases}
+$$
+在Sobolev空间的讨论中我们知道等式右边的形式属于$H^1_0(\Omega)$的对偶空间$H^{-1}(\Omega)$.\\
+\textbf{Definitions}\quad 如果$u\in H^1_0(\Omega)$对任意的$v\in H^1_0(\Omega)$都满足
+$$
+B[u,v] = \left\langle f,v \right\rangle 
+$$
+其中$\left\langle f,v \right\rangle =\int_\Omega f^0v+\sum^n_{i=1}f^iD_iv\mathrm{d}x$,那么我们称$u$是边值问题$(\text{II})$的一个弱解.\par
+接下来我们考虑非零边值问题
+$$
+(\text{I})
+\begin{cases}
+    Lu= f\quad in \, \Omega\\
+     u= 0\quad on \, \partial\Omega\\ 
+\end{cases}
+$$
+其中$u= 0\quad on \, \partial\Omega$是在迹的意义下,即存在一个迹算子$T:H^1_0(\Omega)\to L^2(\partial\Omega)$使得在$\partial\Omega$上有$Tu=g$.那么此时对任意的$v\in H^1_0(\Omega)$,(3)式仍然成立.我们假设$g$是某个$H^1$函数$w$的迹,于是令$\tilde{u}=u-w $,那么显然有$\tilde{u}\in H^1_0(\Omega) $,并且它是边值问题
+$$
+(\text{III})
+\begin{cases}
+    L\tilde{u} = \tilde{f}\quad in \, \Omega\\
+     \tilde{u}= 0\quad on \, \partial\Omega\\ 
+\end{cases}
+$$
+的弱解,其中$\tilde{f}=f-Lw\in H^1_0(\Omega)$.
+\subsection{Existence of weak solutions}
+现在开始我们将讨论弱解的存在性，在此之前我们需要一些泛函分析的理论。我们假设$H$是实Hilbert空间,$(\cdot,\cdot)$是其上内积,$\|\cdot\|$是由内积诱导的范数,$\left\langle \cdot,\cdot\right\rangle $是$H$与其对偶空间的对偶积.\\
+\textbf{Theorem(Lax-Milgram定理)}\quad 假设$B:H\times H\to \mathbb{R}$是一个双线性型,并且满足以下两个条件:\\
+(a)存在常数$\alpha>0$,使得对任意的$u,v\in H$都有
+\begin{equation}
+    |B[u,v]|\leqslant \alpha\|u\|\|v\|
+\end{equation}
+(b)存在常数$\beta>0$,对任意的$u\in H$有
+\begin{equation}
+    \beta\|u\|^2\leqslant B[u,u]
+\end{equation}
+那么对$H$上的任意有界线性泛函$f:H\to \mathbb{R}$,都存在唯一的$u\in H$使得对任意$v\in H$都有
+\begin{equation}
+    B[u,v]=\left\langle f,v \right\rangle 
+\end{equation}
+\textbf{Proof}\quad 固定$u\in H$,那么由(a)可知映射$v\mapsto B[u,v]$是$H$上的有界线性泛函,由Riesz表示定理知,存在唯一的$w\in H$使得
+$$
+B[u,v] = (w,v)
+$$
+我们设$w=Au$,其中$A$是$H$上的变换,下面我们验证$A:H\to H$是有界线性算子.\par
+设$\lambda_1,\lambda_2\in\mathbb{R}$及$u_1,u_2\in H$,那么对于任意的$v\in H$我们有
+$$
+\begin{aligned}
+    (A(\lambda_1u_1+\lambda_2u_2),v) &= B[\lambda_1u_1+\lambda_2u_2,v]\\
+                                     &= \lambda_1B[u_1,v]+\lambda_2 B[u_2,v]\\
+                                     &= \lambda_1 (Au_1,v)+\lambda (Au_2,v)\\
+                                     &= (\lambda_1Au_1+\lambda_2Au_2,v)
+\end{aligned}
+$$
+于是$A$是线性算子,根据(a)我们有
+$$
+\|Au\|^2=(Au,Au)=B[u,Au]\leqslant \alpha \|Au\|\|u\|
+$$
+所以有$\|Au\|\leqslant \alpha\|u\|$.这就证明了$A$是有界的.\par
+下面我们证明$A$是一个双射,根据(b)可知
+$$
+\beta\|u\|^2\leqslant B[u,u]=(Au,u)\leqslant \|Au\|\|u\|
+$$
+因而
+$$
+\beta\|u\|\leqslant \|Au\|\leqslant\|u\|
+$$
+现设$u_1,u_2\in H$使得$Au_1=Au_2$,那么$\beta\|u_1-u_2\|\leqslant \|A(u_1-u_2)\|=\|Au_1-Au_2\|=0$,也即是$u_1=u_2$,这表明$A$是单射.再来证明$A$的值域$R(A)$是闭的.
+对于$\forall w\in \overline{R(A)},\exists u_n\in H$使得$w=\lim\limits_{n\to\infty}Au_n$.对于$\forall p\in \mathbb{N}$,有
+$$
+\begin{aligned}
+    \beta\|u_{n+p}-u_n\| &\leqslant |B[u_{n+p}-u_n,u_{n+p}-u_n]|\\
+                         &= |(A(u_{n+p}-u_n),u_{n+p}-u_n)|\\
+                         &\leqslant \|A(u_{n+p}-u_n)\|\|u_{n+p}-u_n\|
+\end{aligned}
+$$
+即得$\|u_{n+p}-u_n\|\leqslant \frac{1}{\beta}\|Au_{n+p}-Au_n\|\to 0,(n\to \infty,\forall p\in\mathbb{N})$.从而$\{u_n\}$是Cauchy列,因此存在$u\in H$使得$u_n\to u$,再根据$A$的连续性就能得到$w=Au$.因此$R(A)$是闭的.\par
+如果$R(A)\neq H$,根据$H=R(A)\oplus R(A)^{\bot }$,所以存在非零的$w\in R(A)^{\bot}$有
+$$
+\beta\|w\|\leqslant B[w,w]=(Aw,w)=0
+$$
+这和$W$非零矛盾,于是$A$只能是满射.综上就证明了$A$是双射.\par
+根据Riesz表示定理,有
+$$
+\left\langle f,v \right\rangle=(w,v)=(Au,v)=B[u,v] 
+$$
+最后来说明$u$的唯一性.不妨设$B[u_1,v]=B[u_2,v]=\left\langle f,v \right\rangle $,那么$B[u_1-u_2,v]=0$,取$v=u_1-u_2$即可.\par
+下面我们把目光放回到双线性型:
+$$
+B[u,v] = \int_\Omega \sum^n_{i,j=1}a^{ij}D_iu D_jv+\sum^n_{i=1}b^ivD_iu+cuv\mathrm{d}x
+$$
+如果我们能够验证它满足Lax-Milgram定理的条件,那么就能导出弱解的存在性.\\
+\textbf{Theorem(能量估计)}\quad 双线性型$B[\cdot,\cdot]:H^1_0(\Omega)\times H^1_0(\Omega)\to \mathbb{R}$,有上面式子定义,那么存在常数$\alpha,\beta>0,\gamma\geqslant 0$,使得对所有的$u,v\in H^1_0(\Omega)$都有
+\begin{equation}
+    |B[u,v]|\leqslant \alpha\|u\|_{H^1_0(\Omega)}\|v\|_{H^1_0(\Omega)} \tag{i}
+\end{equation}
+以及
+\begin{equation}
+    \beta\|u\|^2_{H^1_0(\Omega)}\leqslant B[u,u]+\gamma\|u\|^2_{H^1_0(\Omega)} \tag{ii}
+\end{equation}
+\textbf{Proof}\quad 首先有
+$$
+\begin{aligned}
+    |B[u,v]| &\leqslant \sum^n_{i,j=1}\|a^{ij}\|_{\infty}\int_{\Omega}|Du||Dv|\mathrm{d}x+\sum^n_{i,j=1}\|b^{i}\|_{\infty}\int_{\Omega}|Du||v|\mathrm{d}x+\|c\|_{\infty}\int_{\Omega}|u||v|\mathrm{d}x\\
+             &\leqslant \alpha\|u\|_{H^1_0(\Omega)}\|v\|_{H^1_0(\Omega)}
+\end{aligned}
+$$
+这里用到了Poincare不等式与H$\ddot{o}$lder不等式.进一步地,由一致椭圆条件我们可以得到
+$$
+\begin{aligned}
+    \theta\int_{\Omega}|Du|^2\mathrm{d}x &\leqslant\int_{\Omega}\sum^n_{i,j=1}a^{ij}D_iu D_ju\mathrm{d}x\\
+                                         &=B[u,u]-\int_{\Omega}\sum^n_{i=1}b^iuD_iu+cu^2\mathrm{d}x\\
+                                         &\leqslant B[u,u]+\sum^n_{i,j=1}\|b^{i}\|_{\infty}\int_{\Omega}|Du||v|\mathrm{d}x+\|c\|_{\infty}\int_{\Omega}|u||v|\mathrm{d}x
+\end{aligned}
+$$
+再根据Cauchy不等式:
+$$
+ab\leqslant\varepsilon a^2+\frac{b^2}{4\varepsilon}\quad (a,b>0,\varepsilon>0)
+$$
+可以得到
+$$
+\int_{\Omega}|Du||u|\mathrm{d}x\leqslant \varepsilon\int_{\Omega}|Du|^2\mathrm{d}x+\frac{1}{4\varepsilon}\int_{\Omega}u^2\mathrm{d}x
+$$
+可选取足够小的$\varepsilon>0$使得
+$$
+\varepsilon\sum^n_{i=1}\|b^i\|_{\infty}<\frac{\theta}{2}
+$$
+于是得到
+$$
+\frac{\theta}{2}\int_{\Omega}|Du|^2\mathrm{d}x\leqslant B[u,u]+C\int_{\Omega}u^2\mathrm{d}x
+$$
+只要取$\beta=\frac{\theta}{2},\gamma=C+\frac{\theta}{2}$即可.\\
+\textbf{Theorem(弱解的第一存在性定理)}\quad 存在常数$\gamma\geqslant 0$,使得对任意的$\mu\geqslant\gamma$及$f\in L^2(\Omega)$,边值问题
+$$
+\begin{cases}
+    Lu+\mu u=f\quad in\, \Omega\\
+    u=0\quad on\,\partial \Omega\\
+\end{cases}
+$$
+都存在唯一的弱解$u\in H^1_0(\Omega)$.\\
+\textbf{Proof}\quad 选取由能量估计给出的$\Gamma$,对于$\mu\geqslant \gamma$,定义双线性型
+$$
+B_{\mu}[u,v]=B[u,v]+\mu (u,v)
+$$
+其中$u,v\in H^1_0(\Omega),(\cdot,\cdot)$是$L^2(\Omega)$上的内积.根据能量估计可知,$B_{\mu}[u,v]$满足Lax-Milgram定理的条件.现在给定$f\in L^2(\Omega)$,令$\left\langle f,v \right\rangle =(f,v)$,这显然是$L^2(\Omega)$上的有界线性泛函,当然在$H^1_0(\Omega)$上也是.利用Lax-Milgram定理立即得到对任意$v\in H^1_0(\Omega)$,存在唯一的$u\in H^1_0(\Omega)$满足
+$$
+B_{\mu}[u,v]=\left\langle f,v \right\rangle =(f,v)
+$$
+这当然是命题中边值问题的唯一弱解.\par
+上边是用Lax-Milgram定理导出了弱解的第一存在性定理.现在我们将用Fredholm二择一定理来导出另外的存在性定理.\\
+下面我们开始考虑边值问题
+$$(\text{I})
+\begin{cases}
+    Lu= f\quad in \, \Omega\\
+     u= 0\quad on \, \partial\Omega\\ 
+\end{cases}
+$$
+及其相应的齐次问题
+$$(\text{I'})
+\begin{cases}
+    Lu= 0\quad in \, \Omega\\
+     u= 0\quad on \, \partial\Omega\\ 
+\end{cases}
+$$
+的弱解存在性问题中.\\
+\textbf{Definitions}\\
+(1)$L$的伴随算子$L^*$定义为
+$$
+L^*v = -\sum^n_{i,j=1}D_i(a^{ij}D_jv)-\sum^n_{i=1}b^iD_iv+(c-\sum^n_{i=1}D_ib^i)v
+$$
+其中要求$b^i\in C^1(\Omega)$\\
+(2)伴随双线性型$B^*:H^1_0(\Omega)\times H^1_0(\Omega)\to \mathbb{R}$定义为
+$$
+B^*[v,u]=B[u,v]
+$$
+(3)如果$v\in H^1_0(\Omega)$对所有的$u\in H^1_0(\Omega)$满足
+$$
+B^*[v,u]=(f,u)
+$$
+那我们称$v$是伴随问题
+$$(*)
+\begin{cases}
+    L^*v= f\quad in \, \Omega\\
+     v= 0\quad on \, \partial\Omega\\ 
+\end{cases}
+$$
+的一个弱解.\\
+\textbf{Theorem(弱解的第二存在性定理)}\\
+(i)必有以下两种情况之一成立:\\
+(1)对任意的$f\in L^2(\Omega)$,边值问题(I)有唯一弱解.\\
+(2)齐次问题(I)有非零弱解.\\
+(ii)若情况(2)成立,那么(I')的弱解空间$N$的维数有限并且等于齐次问题
+$$(**)
+\begin{cases}
+    L^*v= 0\quad in \, \Omega\\
+     v= 0\quad on \, \partial\Omega\\ 
+\end{cases}
+$$
+的弱解空间$N^*$的维数.\\
+(iii)边值问题(I)有弱解当且仅当对任意$v\in N^*$都有
+$$
+(f,v)=0
+$$
+\textbf{Theorem(弱解的第三存在性定理)}\\
+(i)集合$\sigma (L)$至多可数,边值问题
+$$
+\begin{cases}
+    Lu= \lambda u+f\quad in \, \Omega\\
+     u= 0\quad on \, \partial\Omega\\ 
+\end{cases}
+$$
+对任意的$f\in L^2(\Omega)$有唯一弱解当且仅当$\lambda\notin \sigma (L)$.\\
+(ii)若$\sigma (L)$是无限集,那么它等于一个单调不减序列$\{\lambda _k\}^\infty _{k=1}$并且
+$$
+\lambda _k\to \infty
+$$
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
